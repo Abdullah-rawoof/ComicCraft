@@ -31,8 +31,9 @@ class PromptRequest(BaseModel):
 async def home(request: Request):
     """Render the homepage input form."""
     return templates.TemplateResponse(
-        "index.html",
-        {"request": request, "page_title": "ComicCraft - AI Comic Book Creator"}
+        request=request,
+        name="index.html",
+        context={"page_title": "ComicCraft - AI Comic Book Creator"}
     )
 
 @router.post("/generate", response_class=HTMLResponse)
@@ -86,9 +87,9 @@ async def generate_comic_form(
         web_pdf_path = f"/{pdf_path}" if not pdf_path.startswith("/") else pdf_path
 
         return templates.TemplateResponse(
-            "comic_preview.html",
-            {
-                "request": request,
+            request=request,
+            name="comic_preview.html",
+            context={
                 "layout": layout,
                 "pdf_path": web_pdf_path,
                 "story_prompt": story_prompt,
@@ -147,9 +148,9 @@ async def export_success(request: Request, pdf_path: str = Query(...)):
     """Render the export confirmation page with download action."""
     web_pdf_path = f"/{pdf_path}" if not pdf_path.startswith("/") else pdf_path
     return templates.TemplateResponse(
-        "export_success.html",
-        {
-            "request": request,
+        request=request,
+        name="export_success.html",
+        context={
             "pdf_path": web_pdf_path
         }
     )
