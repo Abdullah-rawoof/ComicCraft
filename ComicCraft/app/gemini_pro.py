@@ -28,6 +28,7 @@ def generate_story(outline: list[dict]) -> str:
     Generate full comic story narration and character dialogue using Google Gemini Pro.
     Takes a 5-panel outline list and returns a formatted multi-panel story string.
     """
+    load_dotenv(override=True)
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     
     if not api_key:
@@ -58,16 +59,19 @@ def generate_story(outline: list[dict]) -> str:
             "Make the dialogue punchy and memorable, with high dramatic tension or comedic timing matching the tone."
         )
 
-        # Use gemini-1.5-pro as specified in the project documentation
-        try:
-            model = genai.GenerativeModel("gemini-1.5-pro")
-            response = model.generate_content(prompt)
-            story_text = response.text
-        except Exception as pro_err:
-            logger.warning(f"gemini-1.5-pro error: {pro_err}. Falling back to gemini-1.5-flash...")
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(prompt)
-            story_text = response.text
+        # Use active Gemini models in candidate order
+        candidate_models = ["gemini-flash-latest", "gemini-3.8-flash", "gemini-pro-latest", "gemini-1.5-pro", "gemini-1.5-flash"]
+        story_text = ""
+        for m_name in candidate_models:
+            try:
+                model = genai.GenerativeModel(m_name)
+                response = model.generate_content(prompt)
+                if response and response.text:
+                    story_text = response.text
+                    logger.info(f"Gemini Story succeeded using model: {m_name}")
+                    break
+            except Exception as m_err:
+                logger.warning(f"Gemini story model {m_name} failed: {m_err}. Trying next...")
 
         if story_text and len(story_text.strip()) > 50:
             return story_text.strip()

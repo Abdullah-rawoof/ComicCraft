@@ -75,6 +75,7 @@ def generate_outline(user_prompt: str) -> list[dict]:
       - 'scene_description': str
       - 'image_prompt': str
     """
+    load_dotenv(override=True)
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     
     if not api_key:
@@ -85,15 +86,11 @@ def generate_outline(user_prompt: str) -> list[dict]:
         import google.generativeai as genai
         genai.configure(api_key=api_key)
         
-        # Use gemini-1.5-flash as specified in project documentation
-        model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
-            generation_config={
-                "temperature": 0.7,
-                "response_mime_type": "application/json"
-            }
-        )
-
+        # Try candidate flash models in order
+        candidate_models = ["gemini-flash-latest", "gemini-3.8-flash", "gemini-1.5-flash", "gemini-2.5-flash"]
+        model = None
+        response = None
+        
         system_instruction = (
             "You are an expert comic book scriptwriter and storyboard director. "
             "Based on the user's comic prompt, create a structured 5-panel comic storyline outline. "
@@ -105,9 +102,26 @@ def generate_outline(user_prompt: str) -> list[dict]:
             "- image_prompt (string: vivid, detailed prompt for Stable Diffusion comic book illustration, including art style keywords, comic inks, dynamic lighting)"
         )
 
-        response = model.generate_content(
-            f"{system_instruction}\n\nUser Story Prompt: {user_prompt}"
-        )
+        for m_name in candidate_models:
+            try:
+                model = genai.GenerativeModel(
+                    model_name=m_name,
+                    generation_config={
+                        "temperature": 0.7,
+                        "response_mime_type": "application/json"
+                    }
+                )
+                response = model.generate_content(
+                    f"{system_instruction}\n\nUser Story Prompt: {user_prompt}"
+                )
+                if response and response.text:
+                    logger.info(f"Gemini Flash succeeded using model: {m_name}")
+                    break
+            except Exception as model_err:
+                logger.warning(f"Gemini model {m_name} failed: {model_err}. Trying next...")
+
+        if not response or not response.text:
+            return _generate_fallback_outline(user_prompt)
 
         raw_text = response.text or ""
         cleaned_json = _clean_json_string(raw_text)

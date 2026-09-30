@@ -1,0 +1,29 @@
+# Environment variables (DO NOT COMMIT SECRETS)
+.env
+.env.local
+.env.*.local
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Virtual Environments
+env/
+venv/
+comiccraft-env/
+ENV/
+
+# ComicCraft Generated Content (Keep static dirs, ignore dynamic files)
+static/panels/*.png
+!static/panels/placeholder.png
+static/exports/*.pdf
+!static/exports/.gitkeep
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

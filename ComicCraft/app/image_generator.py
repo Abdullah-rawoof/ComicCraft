@@ -157,26 +157,50 @@ def _try_huggingface_api(prompt: str, output_path: str) -> bool:
     if not hf_token:
         return False
 
+    # 1. Try official InferenceClient with active serverless models
+    try:
+        from huggingface_hub import InferenceClient
+        client = InferenceClient(token=hf_token)
+        preferred_model = os.getenv("STABLE_DIFFUSION_MODEL", "black-forest-labs/FLUX.1-schnell")
+        candidate_models = [preferred_model, "black-forest-labs/FLUX.1-schnell", "stabilityai/stable-diffusion-xl-base-1.0"]
+        # Deduplicate
+        seen = set()
+        models_to_try = [m for m in candidate_models if not (m in seen or seen.add(m))]
+
+        styled_prompt = f"{prompt}, high quality comic book style illustration, rich colors, graphic novel ink lines, sharp details"
+
+        for m_name in models_to_try:
+            try:
+                image = client.text_to_image(styled_prompt, model=m_name)
+                image.save(output_path)
+                logger.info(f"HuggingFace InferenceClient generated image with {m_name}: {output_path}")
+                return True
+            except Exception as client_err:
+                logger.warning(f"InferenceClient model {m_name} failed: {client_err}")
+    except Exception as e:
+        logger.warning(f"InferenceClient initialization failed: {e}")
+
+    # 2. Direct HTTP fallback
     try:
         import requests
-        api_url = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
+        api_url = f"https://api-inference.huggingface.co/models/{os.getenv('STABLE_DIFFUSION_MODEL', 'runwayml/stable-diffusion-v1-5')}"
         headers = {"Authorization": f"Bearer {hf_token}"}
         payload = {
             "inputs": f"{prompt}, high quality comic book style illustration, rich colors, graphic novel ink lines",
             "parameters": {"width": 512, "height": 512}
         }
         
-        response = requests.post(api_url, headers=headers, json=payload, timeout=45)
+        response = requests.post(api_url, headers=headers, json=payload, timeout=60)
         if response.status_code == 200 and response.headers.get("content-type", "").startswith("image"):
             with open(output_path, "wb") as f:
                 f.write(response.content)
-            logger.info(f"HuggingFace API generated image: {output_path}")
+            logger.info(f"HuggingFace API generated image via HTTP: {output_path}")
             return True
         else:
-            logger.warning(f"HF API returned status {response.status_code}: {response.text[:100]}")
+            logger.warning(f"HF API returned status {response.status_code}: {response.text[:120]}")
             return False
     except Exception as e:
-        logger.warning(f"HF API request failed: {e}")
+        logger.warning(f"HF API direct request failed: {e}")
         return False
 
 def _try_pollinations_ai(prompt: str, output_path: str) -> bool:
@@ -207,6 +231,7 @@ def generate_image(prompt: str) -> str:
     Generate a comic-style image based on the prompt and save it to static/panels/.
     Returns the file path to the saved image (e.g. 'static/panels/panel_...png').
     """
+    load_dotenv(override=True)
     filename = _sanitize_prompt(prompt)
     output_path = os.path.join("static", "panels", filename).replace("\\", "/")
 
