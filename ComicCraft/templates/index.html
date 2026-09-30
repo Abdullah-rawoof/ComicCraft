@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComicCraft - AI Comic Story & Illustration Creator</title>
+    <meta name="description" content="Turn your imagination into stunning 5-panel comic books using Google Gemini AI and Stable Diffusion. Generate story, dialogues, artwork, and downloadable PDF in seconds.">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💥</text></svg>">
+</head>
+<body>
+    <div class="comic-halftone"></div>
+
+    <!-- Header Navigation -->
+    <header class="comic-navbar">
+        <div class="container nav-content">
+            <a href="/" class="brand-logo" id="brand-logo">
+                <span class="logo-badge">CC</span>
+                <span class="brand-title">COMICCRAFT</span>
+                <span class="brand-tag">AI Powered</span>
+            </a>
+            <div class="nav-links">
+                <a href="/test-image" class="nav-btn" id="nav-test-image">🎨 Test Image API</a>
+                <a href="/docs" target="_blank" class="nav-btn" id="nav-api-docs">⚡ API Docs</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="comic-badge">💥 NEXT-GEN AI STORYTELLING 💥</div>
+            <h1 class="hero-title">
+                CRAFT YOUR OWN <span class="pop">COMIC STRIP</span> IN <span class="burst">SECONDS!</span>
+            </h1>
+            <p class="hero-subtitle">
+                Enter your story idea and let Google Gemini AI architect your narrative while Stable Diffusion brings your characters and scenes to life with vibrant comic artwork.
+            </p>
+        </section>
+
+        <!-- Generation Form Card -->
+        <section class="form-card">
+            <form action="/generate" method="POST" id="comic-form" onsubmit="showLoading()">
+                <div class="form-grid">
+                    
+                    <!-- Story Prompt Input -->
+                    <div class="form-group">
+                        <label for="story_prompt">
+                            <span class="label-icon">📖</span> Story Prompt / Idea
+                        </label>
+                        <textarea 
+                            name="story_prompt" 
+                            id="story_prompt" 
+                            class="form-textarea" 
+                            placeholder="Describe your comic concept (e.g. A brave fox exploring an enchanted forest finds a glowing crystal...)" 
+                            required
+                        ></textarea>
+
+                        <!-- Quick Fill Inspiration Chips -->
+                        <div class="quick-fill-container">
+                            <span class="quick-label">⚡ Quick Presets:</span>
+                            <button type="button" class="chip-btn" onclick="fillPreset('A brave young fox exploring an enchanted glowing forest discovers a forgotten ancient portal.', 'Rusty the Fox', 'Enchanted Forest', 'Dramatic', 'Comic Book')">🦊 Brave Fox</button>
+                            <button type="button" class="chip-btn" onclick="fillPreset('A cybernetic street detective investigates missing neon energy conduits in the rain.', 'Detective Vance', 'Cyberpunk Metropolis', 'Dark Mystery', 'Anime / Manga')">🚀 Cyber Detective</button>
+                            <button type="button" class="chip-btn" onclick="fillPreset('A quirky superhero who can manipulate gravity accidentally sends lunch flying across the cafeteria.', 'Captain Zero-G', 'High School', 'Funny / Light-hearted', 'Vintage Pop Art')">🍕 Gravity Hero</button>
+                            <button type="button" class="chip-btn" onclick="fillPreset('An ambitious cosmic explorer crash lands on an alien crystal planet and meets a friendly creature.', 'Captain Nova', 'Alien Planet', 'Epic Adventure', 'Realistic Graphic Novel')">🪐 Star Explorer</button>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Character Name & Setting -->
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="character_name">
+                                <span class="label-icon">🦸</span> Main Character Name
+                            </label>
+                            <input 
+                                type="text" 
+                                name="character_name" 
+                                id="character_name" 
+                                class="form-input" 
+                                placeholder="e.g. Rusty the Brave Fox" 
+                                value="Rusty the Brave Fox"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="setting">
+                                <span class="label-icon">🌲</span> Story Setting
+                            </label>
+                            <select name="setting" id="setting" class="form-select">
+                                <option value="Enchanted Forest" selected>Enchanted Forest</option>
+                                <option value="Cyberpunk Metropolis">Cyberpunk Metropolis</option>
+                                <option value="Deep Space & Alien Planet">Deep Space & Alien Planet</option>
+                                <option value="Ancient Mythological Temple">Ancient Mythological Temple</option>
+                                <option value="High School Academy">High School Academy</option>
+                                <option value="Underwater Coral City">Underwater Coral City</option>
+                                <option value="Post-Apocalyptic Wasteland">Post-Apocalyptic Wasteland</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Tone & Art Style -->
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="tone">
+                                <span class="label-icon">🎭</span> Story Tone / Mood
+                            </label>
+                            <select name="tone" id="tone" class="form-select">
+                                <option value="Dramatic & Heroic" selected>Dramatic & Heroic</option>
+                                <option value="Funny / Light-hearted">Funny / Light-hearted</option>
+                                <option value="Epic Adventure">Epic Adventure</option>
+                                <option value="Dark Mystery & Suspense">Dark Mystery & Suspense</option>
+                                <option value="Poetic & Whimsical">Poetic & Whimsical</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="art_style">
+                                <span class="label-icon">🎨</span> Illustration Art Style
+                            </label>
+                            <select name="art_style" id="art_style" class="form-select">
+                                <option value="Comic Book" selected>Classic Comic Book (Bold Inks & Halftones)</option>
+                                <option value="Anime / Manga">Anime / Manga (Dynamic Lines & Vibrant)</option>
+                                <option value="Pixel Art">16-Bit Pixel Art Style</option>
+                                <option value="Realistic Graphic Novel">Realistic Graphic Novel</option>
+                                <option value="Vintage Pop Art">Vintage 1960s Pop Art</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div style="margin-top: 12px;">
+                        <button type="submit" class="btn-action" id="generate-btn">
+                            <span>🚀 GENERATE MY 5-PANEL COMIC!</span>
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <!-- Interactive Loading Screen -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-content">
+            <div class="comic-spinner"></div>
+            <h2 class="loading-title">CRAFTING YOUR COMIC...</h2>
+            <p class="loading-step" id="loading-step">⚡ Architecting 5-panel storyline with Gemini Flash...</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="comic-footer">
+        <div class="container">
+            <p>ComicCraft AI • Built with FastAPI, Google Gemini 1.5 & Stable Diffusion • Powered by FPDF</p>
+        </div>
+    </footer>
+
+    <script>
+        function fillPreset(prompt, char, setting, tone, style) {
+            document.getElementById('story_prompt').value = prompt;
+            document.getElementById('character_name').value = char;
+            
+            // Set select values if match
+            const setSelect = document.getElementById('setting');
+            for(let i=0; i<setSelect.options.length; i++) {
+                if(setSelect.options[i].value.includes(setting)) {
+                    setSelect.selectedIndex = i;
+                    break;
+                }
+            }
+
+            const toneSelect = document.getElementById('tone');
+            for(let i=0; i<toneSelect.options.length; i++) {
+                if(toneSelect.options[i].value.includes(tone)) {
+                    toneSelect.selectedIndex = i;
+                    break;
+                }
+            }
+
+            const styleSelect = document.getElementById('art_style');
+            for(let i=0; i<styleSelect.options.length; i++) {
+                if(styleSelect.options[i].value.includes(style)) {
+                    styleSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+            
+            const steps = [
+                "⚡ Architecting 5-panel storyline with Gemini Flash...",
+                "✍️ Writing vivid dialogues & narration with Gemini Pro...",
+                "🎨 Generating Panel 1 comic illustration...",
+                "🖌️ Inking and coloring Panel 2 & 3...",
+                "💥 Rendering climatic Panel 4 & 5 artwork...",
+                "📐 Assembling sequential comic layout...",
+                "📄 Exporting high-res multi-page PDF..."
+            ];
+
+            let stepIdx = 0;
+            const stepElem = document.getElementById('loading-step');
+            setInterval(() => {
+                stepIdx = (stepIdx + 1) % steps.length;
+                stepElem.innerText = steps[stepIdx];
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

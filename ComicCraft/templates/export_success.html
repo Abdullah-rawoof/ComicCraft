@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComicCraft - Export Successful!</title>
+    <meta name="description" content="Your AI comic has been exported successfully. Download your PDF copy.">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎉</text></svg>">
+</head>
+<body>
+    <div class="comic-halftone"></div>
+
+    <header class="comic-navbar">
+        <div class="container nav-content">
+            <a href="/" class="brand-logo" id="brand-logo">
+                <span class="logo-badge">CC</span>
+                <span class="brand-title">COMICCRAFT</span>
+            </a>
+            <div class="nav-links">
+                <a href="/" class="nav-btn">Home</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="success-card">
+            <div class="success-icon-badge">
+                🎉
+            </div>
+            <h1 class="success-title">COMIC EXPORTED!</h1>
+            <p class="success-message">
+                Boom! Your AI comic has been compiled, formatted with Unicode DejaVu typography, and saved into high-resolution PDF format.
+            </p>
+
+            <div class="pdf-preview-box">
+                <div class="pdf-file-details">
+                    <span class="pdf-icon">📄</span>
+                    <div>
+                        <div class="pdf-filename" id="pdf-name-display">{{ pdf_path }}</div>
+                        <div class="pdf-filetype">Standard Multi-Page A4 Comic Book Document</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="success-actions">
+                <a href="/download-pdf?pdf_path={{ pdf_path }}" class="btn-action" id="download-file-btn">
+                    📥 Download PDF Now
+                </a>
+                <a href="{{ pdf_path }}" target="_blank" class="btn-action btn-secondary" id="preview-pdf-btn">
+                    👁️ View PDF in Browser
+                </a>
+                <a href="/" class="btn-action btn-red" id="create-another-comic-btn" style="margin-top: 10px;">
+                    ✨ Go Create Another Comic
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="comic-footer">
+        <div class="container">
+            <p>ComicCraft AI • Developed with FastAPI & Google Gemini Models</p>
+        </div>
+    </footer>
+
+    <script>
+        // Automatically initiate download when arriving at success page
+        window.addEventListener('DOMContentLoaded', () => {
+            const pdfPath = "{{ pdf_path }}";
+            if (pdfPath && pdfPath !== "") {
+                // Short delay to allow DOM to render
+                setTimeout(() => {
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = "/download-pdf?pdf_path=" + encodeURIComponent(pdfPath);
+                    downloadLink.download = "";
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                }, 800);
+            }
+        });
+    </script>
+</body>
+</html>

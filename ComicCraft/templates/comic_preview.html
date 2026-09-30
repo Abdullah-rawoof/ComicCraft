@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComicCraft - Comic Preview & Story</title>
+    <meta name="description" content="View your AI generated comic strip panel by panel and download as a formatted PDF.">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+</head>
+<body>
+    <div class="comic-halftone"></div>
+
+    <!-- Header Navigation -->
+    <header class="comic-navbar">
+        <div class="container nav-content">
+            <a href="/" class="brand-logo" id="brand-logo">
+                <span class="logo-badge">CC</span>
+                <span class="brand-title">COMICCRAFT</span>
+            </a>
+            <div class="nav-links">
+                <a href="/" class="nav-btn" id="nav-new-comic">✨ New Comic</a>
+                <a href="{{ pdf_path }}" target="_blank" class="nav-btn" id="nav-view-pdf">📄 Open PDF</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Story Summary Banner -->
+        <section class="preview-header">
+            <div class="prompt-summary">
+                <h3>📖 {{ character_name }}: The Adventure Begins</h3>
+                <div class="tag-cloud">
+                    <span class="info-tag">Character: <strong>{{ character_name }}</strong></span>
+                    <span class="info-tag">Setting: <strong>{{ setting }}</strong></span>
+                    <span class="info-tag">Tone: <strong>{{ tone }}</strong></span>
+                    <span class="info-tag">Art Style: <strong>{{ art_style }}</strong></span>
+                </div>
+            </div>
+            <div>
+                <a href="/download-pdf?pdf_path={{ pdf_path }}" class="btn-action" id="header-download-btn" style="padding: 12px 24px; font-size: 20px;">
+                    📥 Download Comic PDF
+                </a>
+            </div>
+        </section>
+
+        <!-- Comic Panels Sequential Feed -->
+        <section class="panels-container">
+            {% for panel in layout %}
+            <article class="panel-card" id="panel-{{ panel.panel }}">
+                
+                <!-- Left: Illustration -->
+                <div class="panel-image-wrapper">
+                    <span class="panel-number-badge">PANEL {{ panel.panel }}</span>
+                    <img 
+                        src="{{ panel.image_path }}" 
+                        alt="{{ panel.title }}" 
+                        class="panel-image"
+                        loading="lazy"
+                        onerror="this.src='/static/panels/placeholder.png'"
+                    >
+                </div>
+
+                <!-- Right: Panel Story Content -->
+                <div class="panel-content">
+                    <div class="panel-header-block">
+                        <h2 class="panel-title">{{ panel.title }}</h2>
+                        
+                        {% if panel.scene_description %}
+                        <p class="scene-desc">
+                            <em>Scene Context: {{ panel.scene_description }}</em>
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="story-box">
+                        {% if panel.caption %}
+                        <div class="caption-bubble">
+                            🔊 CAPTION: {{ panel.caption }}
+                        </div>
+                        {% endif %}
+
+                        {% if panel.narration %}
+                        <div class="narration-text">
+                            {{ panel.narration }}
+                        </div>
+                        {% endif %}
+
+                        {% if panel.dialogue %}
+                        <div class="dialogue-bubble">
+                            {{ panel.dialogue }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if panel.image_prompt %}
+                    <div class="image-prompt-ref">
+                        <strong>🎨 Art Prompt:</strong> {{ panel.image_prompt }}
+                    </div>
+                    {% endif %}
+                </div>
+
+            </article>
+            {% endfor %}
+        </section>
+
+        <!-- Sticky Bottom Download & Action Bar -->
+        <div class="download-bar">
+            <div class="download-info">
+                <h4>READY TO READ OR PRINT?</h4>
+                <p>Your 5-panel comic is compiled with Unicode typography and high-res panels.</p>
+            </div>
+            <div class="download-actions">
+                <a href="/" class="btn-action btn-secondary" style="width: auto; padding: 14px 24px; font-size: 18px;" id="create-another-btn">
+                    ← Create Another
+                </a>
+                <a href="/export-success?pdf_path={{ pdf_path }}" class="btn-action" style="width: auto; padding: 14px 28px; font-size: 20px;" id="download-comic-btn">
+                    📥 Download Your Comic as PDF
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="comic-footer">
+        <div class="container">
+            <p>ComicCraft AI • Created with Google Gemini & Stable Diffusion</p>
+        </div>
+    </footer>
+</body>
+</html>
